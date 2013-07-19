@@ -1,0 +1,26 @@
+#/bin/sh
+
+set -e
+
+PACKAGES="oUnit,batteries,pxp,mysql,netclient"
+SELF=`readlink -f $0`
+PROJDIR=`echo $(dirname $SELF) | sed -e "s/\\/bin\\/\?$//"`
+TARGET=`echo $1 | sed -e "s/\.ml$//"`
+OCAMLBUILD=ocamlbuild
+TMPDIR=ocrun_libs
+FLAGS="-use-ocamlfind -Is $TMPDIR -cflags -g -lflags -cclib,/lib/libpthread.so.0 -pkgs $PACKAGES"
+
+shift
+export OCAMLRUNPARAM=b
+pushd $(dirname $TARGET)
+  if [[ -e $TMPDIR ]] ; then 
+    echo "can't create $TMPDIR symlink: file exists!"
+    exit 1
+  fi
+  ln -s $PROJDIR/lib $TMPDIR
+  $OCAMLBUILD $FLAGS $(basename $TARGET).d.byte || true # continue on failure
+  rm $TMPDIR
+popd
+if [[ -e $TARGET.d.byte ]] ; then
+  ocamldebug $(dirname $TARGET)/$(basename $TARGET).d.byte $@
+fi

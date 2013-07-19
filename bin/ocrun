@@ -1,0 +1,32 @@
+#/bin/sh
+
+set -e
+
+PACKAGES="oUnit,batteries,batteries.syntax,pxp,mysql,netclient,sqlite3"
+SELF=`readlink -f $0`
+PROJDIR=`echo $(dirname $SELF) | sed -e "s/\\/bin\\/\?$//"`
+TARGET=`echo $1 | sed -e "s/\.ml$//"`
+OCAMLBUILD=ocamlbuild
+TMPDIR=ocrun_libs
+FLAGS="-use-ocamlfind -Is $TMPDIR/lib,$TMPDIR/KaSim/grammar,$TMPDIR/KaSim/main,$TMPDIR/KaSim/dataStructures,$TMPDIR/KaSim/Error -cflags -g,-syntax,camlp4o -lflags -cclib,/lib/libpthread.so.0 -pkgs $PACKAGES"
+
+shift
+export OCAMLRUNPARAM=b
+if [[ -d $KASIM_SRC_DIR ]] ; then
+  pushd $(dirname $TARGET)
+    if [[ -e $TMPDIR ]] ; then 
+      echo "can't create $TMPDIR symlink: file exists!"
+      exit 1
+    fi
+    mkdir $TMPDIR
+    ln -s $PROJDIR/lib $TMPDIR/lib
+    ln -s $KASIM_SRC_DIR $TMPDIR/KaSim
+    $OCAMLBUILD $FLAGS $(basename $TARGET).native || true # continue on failure
+    rm -r $TMPDIR
+  popd
+  if [[ -e $TARGET.native ]] ; then
+    $(dirname $TARGET)/$(basename $TARGET).native $@
+  fi
+else 
+  echo 'Please set $KASIM_SIRC_DIR environment variable'
+fi
