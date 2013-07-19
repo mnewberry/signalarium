@@ -10,7 +10,7 @@ interest on the fly from authoritative public data services, and analyzes this
 data programmatically to create instances of model families consistent with
 published empirical consensus.
 
-[globe]: https://raw.github.com/mnewberry/signalarium/master/data/misc/signalarium_sm.png
+![globe](https://raw.github.com/mnewberry/signalarium/master/data/misc/signalarium_sm.png "celestial globe")
 
 The software is distributed as an OCaml library, and the primary user interface
 is the OCaml REPL as:
